@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>귀여운 가계부 📝</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- 귀여운 폰트 (구글 폰트: Jua체) 적용 -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Jua&display=swap" rel="stylesheet">
+    
+    <style>
+        /* 둥글둥글하고 귀여운 글꼴 전체 적용 */
+        body {
+            font-family: 'Jua', sans-serif;
+            background-color: #FFF6E3; /* 따뜻하고 부드러운 아이보리/노란색 배경 */
+        }
+        
+        /* 입력창 포커스 시 부드러운 애니메이션 */
+        input, select {
+            transition: all 0.3s ease;
+        }
+    </style>
+</head>
+<body class="flex items-center justify-center min-h-screen py-10 text-gray-700">
+    
+    <!-- 둥글고 귀여운 카드 컨테이너 -->
+    <div class="bg-white p-8 rounded-[2.5rem] shadow-[0_10px_40px_rgba(255,180,100,0.2)] border-4 border-yellow-300 w-full max-w-md relative overflow-hidden">
+        
+        <!-- 카드 모서리 귀여운 동그라미 데코 -->
+        <div class="absolute -top-6 -right-6 w-20 h-20 bg-pink-200 rounded-full opacity-60"></div>
+        <div class="absolute -bottom-6 -left-6 w-24 h-24 bg-blue-200 rounded-full opacity-60"></div>
+
+        <h2 class="text-3xl font-normal mb-8 text-center text-orange-500 relative z-10 tracking-wide">
+            💸 나의 가계부 💸
+        </h2>
+        
+        <form id="expenseForm" class="space-y-5 relative z-10">
+            <!-- 사용 날짜 -->
+            <div>
+                <label for="date" class="block text-xl text-pink-500 mb-1 ml-2">🗓️ 언제 쓰셨나요?</label>
+                <input type="date" id="date" name="date" required class="block w-full border-2 border-pink-200 rounded-2xl p-3 focus:ring-4 focus:ring-pink-100 focus:border-pink-400 outline-none bg-pink-50/40 text-gray-600 text-lg">
+            </div>
+
+            <!-- 사용처 -->
+            <div>
+                <label for="usagePlace" class="block text-xl text-blue-500 mb-1 ml-2">🏪 어디서 쓰셨나요?</label>
+                <input type="text" id="usagePlace" name="usagePlace" placeholder="예: 맛있는 빵집" required class="block w-full border-2 border-blue-200 rounded-2xl p-3 focus:ring-4 focus:ring-blue-100 focus:border-blue-400 outline-none bg-blue-50/40 text-gray-600 text-lg">
+            </div>
+
+            <!-- 금액 -->
+            <div>
+                <label for="amount" class="block text-xl text-green-500 mb-1 ml-2">💰 얼마인가요?</label>
+                <input type="number" id="amount" name="amount" placeholder="예: 15000" required class="block w-full border-2 border-green-200 rounded-2xl p-3 focus:ring-4 focus:ring-green-100 focus:border-green-400 outline-none bg-green-50/40 text-gray-600 text-lg">
+            </div>
+
+            <!-- 유형 -->
+            <div>
+                <label for="type" class="block text-xl text-purple-500 mb-1 ml-2">💳 어떻게 결제했나요?</label>
+                <select id="type" name="type" required class="block w-full border-2 border-purple-200 rounded-2xl p-3 focus:ring-4 focus:ring-purple-100 focus:border-purple-400 outline-none bg-purple-50/40 text-gray-600 text-lg cursor-pointer">
+                    <option value="카드">💳 카드 결제</option>
+                    <option value="현금">💵 현금 결제</option>
+                </select>
+            </div>
+            
+            <!-- 카드사 -->
+            <div>
+                <label for="cardCompany" class="block text-xl text-orange-400 mb-1 ml-2">🏦 어떤 카드인가요? (선택)</label>
+                <div class="flex space-x-2">
+                    <select id="cardCompany" name="cardCompany" class="block w-full border-2 border-orange-200 rounded-2xl p-3 focus:ring-4 focus:ring-orange-100 focus:border-orange-400 outline-none bg-orange-50/40 text-gray-600 text-lg cursor-pointer">
+                        <option value="">-- 선택 안함 --</option>
+                    </select>
+                    <button type="button" onclick="addOption('cardCompany')" class="bg-orange-100 text-orange-500 px-4 rounded-2xl hover:bg-orange-200 border-2 border-orange-200 transition text-2xl shadow-sm" title="새 카드사 추가">+</button>
+                    <button type="button" onclick="removeOption('cardCompany')" class="bg-gray-100 text-gray-400 px-4 rounded-2xl hover:bg-gray-200 border-2 border-gray-200 transition text-2xl shadow-sm" title="선택한 항목 지우기">-</button>
+                </div>
+            </div>
+
+            <!-- 카테고리 -->
+            <div>
+                <label for="category" class="block text-xl text-teal-500 mb-1 ml-2">🏷️ 어디에 속하나요? (선택)</label>
+                <div class="flex space-x-2">
+                    <select id="category" name="category" class="block w-full border-2 border-teal-200 rounded-2xl p-3 focus:ring-4 focus:ring-teal-100 focus:border-teal-400 outline-none bg-teal-50/40 text-gray-600 text-lg cursor-pointer">
+                        <option value="">-- 선택 안함 --</option>
+                    </select>
+                    <button type="button" onclick="addOption('category')" class="bg-teal-100 text-teal-600 px-4 rounded-2xl hover:bg-teal-200 border-2 border-teal-200 transition text-2xl shadow-sm" title="새 카테고리 추가">+</button>
+                    <button type="button" onclick="removeOption('category')" class="bg-gray-100 text-gray-400 px-4 rounded-2xl hover:bg-gray-200 border-2 border-gray-200 transition text-2xl shadow-sm" title="선택한 항목 지우기">-</button>
+                </div>
+            </div>
+
+            <!-- 메모 -->
+            <div>
+                <label for="memo" class="block text-xl text-indigo-400 mb-1 ml-2">✏️ 짧은 메모 (선택)</label>
+                <input type="text" id="memo" name="memo" placeholder="예: 친구들이랑 즐겁게!" class="block w-full border-2 border-indigo-200 rounded-2xl p-3 focus:ring-4 focus:ring-indigo-100 focus:border-indigo-400 outline-none bg-indigo-50/40 text-gray-600 text-lg">
+            </div>
+
+            <!-- 전송 버튼 -->
+            <button type="submit" id="submitBtn" class="w-full bg-orange-400 text-white text-2xl py-4 px-4 rounded-2xl hover:bg-orange-500 shadow-lg transform hover:-translate-y-1 transition duration-300 mt-8 tracking-wide">
+                🚀 노션으로 숑숑!
+            </button>
+        </form>
+        
+        <!-- 결과 메시지 표시 영역 -->
+        <div id="resultMessage" class="mt-4 text-center text-xl hidden relative z-10"></div>
+    </div>
+
+    <script>
+        // 날짜 기본값
+        document.getElementById('date').valueAsDate = new Date();
+
+        // 관리 리스트
+        const defaultCardCompanies = ['현대 카드', '탄탄대로 국민 카드', '골프존 국민 카드'];
+        const defaultCategories = ['고정비', '문화/여가', '쇼핑', '식비', '교통비'];
+
+        function loadOptions(key, defaultArray) {
+            const saved = localStorage.getItem(key);
+            if (saved) return JSON.parse(saved);
+            localStorage.setItem(key, JSON.stringify(defaultArray));
+            return defaultArray;
+        }
+
+        function renderSelect(selectId, optionsArray) {
+            const select = document.getElementById(selectId);
+            const currentValue = select.value;
+            
+            select.innerHTML = '<option value="">-- 선택 안함 --</option>';
+            optionsArray.forEach(opt => {
+                const option = document.createElement('option');
+                option.value = opt;
+                // 카드면 💳, 카테고리면 📌 이모지를 슬쩍 붙여볼 수 있지만, 데이터에 이모지가 들어가면 노션 DB 카테고리 매칭에 오류날 수 있으므로 텍스트만 유지
+                option.textContent = opt;
+                select.appendChild(option);
+            });
+            
+            if (optionsArray.includes(currentValue)) select.value = currentValue;
+        }
+
+        let cardCompanies = loadOptions('cardCompanies', defaultCardCompanies);
+        let categories = loadOptions('categories', defaultCategories);
+
+        renderSelect('cardCompany', cardCompanies);
+        renderSelect('category', categories);
+
+        window.addOption = function(type) {
+            const isCard = type === 'cardCompany';
+            const name = isCard ? '카드사' : '카테고리';
+            const value = prompt(`✨ 추가하실 새로운 [${name}]의 이름을 입력하세요:\n(노션에 있는 이름과 정확히 똑같이 적어주세요!)`);
+            
+            if (value && value.trim() !== '') {
+                const trimValue = value.trim();
+                if (isCard) {
+                    if (!cardCompanies.includes(trimValue)) {
+                        cardCompanies.push(trimValue);
+                        localStorage.setItem('cardCompanies', JSON.stringify(cardCompanies));
+                        renderSelect('cardCompany', cardCompanies);
+                    }
+                    document.getElementById('cardCompany').value = trimValue;
+                } else {
+                    if (!categories.includes(trimValue)) {
+                        categories.push(trimValue);
+                        localStorage.setItem('categories', JSON.stringify(categories));
+                        renderSelect('category', categories);
+                    }
+                    document.getElementById('category').value = trimValue;
+                }
+            }
+        }
+
+        window.removeOption = function(type) {
+            const isCard = type === 'cardCompany';
+            const selectId = isCard ? 'cardCompany' : 'category';
+            const select = document.getElementById(selectId);
+            const value = select.value;
+            const name = isCard ? '카드사' : '카테고리';
+            
+            if (!value) {
+                alert(`💦 삭제하시려는 [${name}] 항목을 왼쪽 목록에서 먼저 선택해 주세요.`);
+                return;
+            }
+            
+            if (confirm(`'${value}' 항목을 목록에서 영구적으로 삭제하시겠습니까? 🥲`)) {
+                if (isCard) {
+                    cardCompanies = cardCompanies.filter(c => c !== value);
+                    localStorage.setItem('cardCompanies', JSON.stringify(cardCompanies));
+                    renderSelect('cardCompany', cardCompanies);
+                } else {
+                    categories = categories.filter(c => c !== value);
+                    localStorage.setItem('categories', JSON.stringify(categories));
+                    renderSelect('category', categories);
+                }
+            }
+        }
+
+        document.getElementById('expenseForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const submitBtn = document.getElementById('submitBtn');
+            const resultMessage = document.getElementById('resultMessage');
+            
+            const payload = {
+                date: document.getElementById('date').value,
+                usagePlace: document.getElementById('usagePlace').value,
+                amount: document.getElementById('amount').value,
+                type: document.getElementById('type').value,
+                cardCompany: document.getElementById('cardCompany').value,
+                category: document.getElementById('category').value,
+                memo: document.getElementById('memo').value
+            };
+
+            submitBtn.disabled = true;
+            submitBtn.innerText = '슝슝 날아가는 중... 🚀';
+            submitBtn.classList.add('opacity-70', 'cursor-not-allowed');
+            resultMessage.classList.add('hidden');
+
+            try {
+                // "카드 결제" 처럼 뒤에 결제가 붙은 경우 API 전송 시 값 맞춰주기 위함이나
+                // option value 자체를 "카드" "현금" 으로 했으므로 문제 없음.
+                
+                const response = await fetch('/api/submit', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload),
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    resultMessage.innerText = '🎉 성공적으로 등록되었습니다! 찰칵 📸';
+                    resultMessage.className = 'mt-5 text-center text-xl text-orange-500 block';
+                    
+                    document.getElementById('usagePlace').value = '';
+                    document.getElementById('amount').value = '';
+                    document.getElementById('memo').value = '';
+                    document.getElementById('date').valueAsDate = new Date();
+                } else {
+                    throw new Error(data.message || '등록 실패');
+                }
+            } catch (error) {
+                resultMessage.innerText = '😭 오류가 났어요: ' + error.message;
+                resultMessage.className = 'mt-5 text-center text-xl text-red-500 block';
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.innerText = '🚀 노션으로 숑숑!';
+                submitBtn.classList.remove('opacity-70', 'cursor-not-allowed');
+            }
+        });
+    </script>
+</body>
+</html>

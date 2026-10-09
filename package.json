@@ -1,0 +1,8 @@
+{
+  "name": "notion-expense-app",
+  "version": "1.0.0",
+  "description": "카드 및 현금 지출 내역 노션 등록 앱",
+  "dependencies": {
+    "@notionhq/client": "^2.2.14"
+  }
+}
