@@ -4,6 +4,19 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>귀여운 가계부 📝</title>
+    <meta name="description" content="손쉽고 귀여운 카드 및 현금 지출 내역 가계부">
+    <!-- PWA 및 모바일 웹 설정 -->
+    <link rel="manifest" href="./manifest.json">
+    <link rel="icon" type="image/png" sizes="64x64" href="./favicon.png">
+    <link rel="shortcut icon" href="./favicon.ico">
+    <link rel="apple-touch-icon" href="./apple-touch-icon.png">
+    <meta name="theme-color" content="#FFF6E3">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="귀여운 가계부">
+    <meta name="application-name" content="귀여운 가계부">
+
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- 귀여운 폰트 (구글 폰트: Jua체) 적용 -->
@@ -24,18 +37,39 @@
         }
     </style>
 </head>
-<body class="flex items-center justify-center min-h-screen py-10 text-gray-700">
+<body class="flex items-center justify-center min-h-screen py-10 px-4 text-gray-700">
     
     <!-- 둥글고 귀여운 카드 컨테이너 -->
-    <div class="bg-white p-8 rounded-[2.5rem] shadow-[0_10px_40px_rgba(255,180,100,0.2)] border-4 border-yellow-300 w-full max-w-md relative overflow-hidden">
+    <div class="bg-white p-6 sm:p-8 rounded-[2.5rem] shadow-[0_10px_40px_rgba(255,180,100,0.2)] border-4 border-yellow-300 w-full max-w-md relative overflow-hidden">
         
         <!-- 카드 모서리 귀여운 동그라미 데코 -->
-        <div class="absolute -top-6 -right-6 w-20 h-20 bg-pink-200 rounded-full opacity-60"></div>
-        <div class="absolute -bottom-6 -left-6 w-24 h-24 bg-blue-200 rounded-full opacity-60"></div>
+        <div class="absolute -top-6 -right-6 w-20 h-20 bg-pink-200 rounded-full opacity-60 pointer-events-none"></div>
+        <div class="absolute -bottom-6 -left-6 w-24 h-24 bg-blue-200 rounded-full opacity-60 pointer-events-none"></div>
 
-        <h2 class="text-3xl font-normal mb-8 text-center text-orange-500 relative z-10 tracking-wide">
-            💸 나의 가계부 💸
-        </h2>
+        <!-- 귀여운 앱 아이콘 및 타이틀 헤더 -->
+        <div class="flex flex-col items-center justify-center mb-6 relative z-10 text-center">
+            <div class="relative w-24 h-24 mb-3 rounded-3xl overflow-hidden shadow-md border-4 border-yellow-300 transform hover:scale-105 transition duration-300 bg-orange-100 flex items-center justify-center">
+                <img src="./icon-192.png" alt="귀여운 가계부 앱 아이콘" class="w-full h-full object-cover">
+            </div>
+            <h2 class="text-3xl font-normal text-orange-500 tracking-wide">
+                💸 나의 가계부 💸
+            </h2>
+            <p class="text-sm text-amber-700/70 mt-1">간편하게 기록하고 노션으로 쏙!</p>
+        </div>
+
+        <!-- 홈 화면 앱 설치 배너 -->
+        <div id="installBanner" class="mb-5 bg-gradient-to-r from-orange-100 via-amber-50 to-yellow-100 border-2 border-orange-200 rounded-2xl p-3 flex items-center justify-between shadow-sm relative z-10">
+            <div class="flex items-center space-x-2.5">
+                <span class="text-2xl animate-bounce">📲</span>
+                <div>
+                    <div class="text-sm font-bold text-orange-700">홈 화면에 앱 설치하기</div>
+                    <div class="text-xs text-orange-600/80">바탕화면에서 바로 열어보세요!</div>
+                </div>
+            </div>
+            <button id="installAppBtn" type="button" class="bg-orange-500 hover:bg-orange-600 text-white text-sm font-bold px-3 py-2 rounded-xl shadow transition transform active:scale-95 whitespace-nowrap">
+                설치
+            </button>
+        </div>
         
         <form id="expenseForm" class="space-y-5 relative z-10">
             <!-- 사용 날짜 -->
@@ -244,6 +278,66 @@
                 submitBtn.innerText = '🚀 노션으로 숑숑!';
                 submitBtn.classList.remove('opacity-70', 'cursor-not-allowed');
             }
+        });
+
+        // ============================================
+        // PWA (웹 앱) 설치 및 서비스 워커 등록 스크립트
+        // ============================================
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./sw.js')
+                    .then((reg) => {
+                        console.log('✅ ServiceWorker 등록 성공:', reg.scope);
+                    })
+                    .catch((err) => {
+                        console.log('ℹ️ ServiceWorker 등록 상태:', err);
+                    });
+            });
+        }
+
+        let deferredPrompt = null;
+        const installBanner = document.getElementById('installBanner');
+        const installAppBtn = document.getElementById('installAppBtn');
+
+        // 이미 PWA(독립 앱) 화면으로 실행 중인 경우 설치 배너 숨기기
+        const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+        if (isStandalone && installBanner) {
+            installBanner.classList.add('hidden');
+        }
+
+        // 크롬 / 안드로이드의 설치 가능 이벤트 감지
+        window.addEventListener('beforeinstallprompt', (e) => {
+            // 브라우저 기본 미니 인포바 방지
+            e.preventDefault();
+            deferredPrompt = e;
+            // 설치 배너 노출
+            if (installBanner) {
+                installBanner.classList.remove('hidden');
+            }
+        });
+
+        // 설치 버튼 클릭 시 동작
+        if (installAppBtn) {
+            installAppBtn.addEventListener('click', async () => {
+                if (deferredPrompt) {
+                    deferredPrompt.prompt();
+                    const { outcome } = await deferredPrompt.userChoice;
+                    console.log('사용자 설치 선택:', outcome);
+                    if (outcome === 'accepted') {
+                        if (installBanner) installBanner.classList.add('hidden');
+                    }
+                    deferredPrompt = null;
+                } else {
+                    // 이벤트가 아직 안 떴거나 데스크톱/iOS 등 수동 설치 가이드
+                    alert('📱 [크롬 앱 설치 안내]\n\n크롬 주소창 오른쪽 끝의 [설치 아이콘 💻]을 클릭하시거나,\n우측 상단 메뉴(점 3개 ⋮) -> [가계부 앱 설치] 또는 [홈 화면에 추가]를 눌러주시면 바로 설치됩니다! ✨');
+                }
+            });
+        }
+
+        // 설치 완료 시 배너 숨김 처리
+        window.addEventListener('appinstalled', () => {
+            if (installBanner) installBanner.classList.add('hidden');
+            console.log('🎉 앱이 성공적으로 설치되었습니다!');
         });
     </script>
 </body>
